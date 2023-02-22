@@ -1,0 +1,101 @@
+const Discord = require('discord.js');
+const fetch = require('node-fetch');
+
+const client = new Discord.Client();
+
+client.on('message', async (message) => {
+  if (message.content === '!criartarefa') {
+    const questions = [
+      'Qual é o título da tarefa?',
+      'Quem é o responsável pela tarefa? (Informe o código do usuário no ClickUp)',
+      'Descreva a tarefa em detalhes.',
+      'Qual a data de conclusão da tarefa? (Informe a resposta em um formato de data dd/mm/aaaa)',
+      'Qual é o Espaço?',
+      'Qual é a Pasta?',
+      'Qual é a Lista?'
+    ];
+
+    let answers = [];
+    let counter = 0;
+
+    const filter = (m) => m.author.id === message.author.id;
+
+    await message.author.send(questions[counter++]);
+
+    const collector = message.author.dmChannel.createMessageCollector(filter, {
+      max: questions.length,
+      time: 1000 * 60, // tempo limite em milissegundos para responder cada pergunta
+    });
+
+    collector.on('collect', async (m) => {
+      if (counter < questions.length) {
+        await message.author.send(questions[counter++]);
+      }
+      answers.push(m.content);
+    });
+
+    collector.on('end', async (collected, reason) => {
+      if (reason === 'time') {
+        await message.author.send('Tempo limite para responder expirado.');
+        return;
+      }
+
+      const taskData = {
+        name: answers[0],
+        assignees: [answers[1]],
+        description: answers[2],
+        due_date: answers[3],
+      };
+
+      const space = answers[4];
+      const folder = answers[5];
+      const list = answers[6];
+
+      const apiKey = 'API_KEY'; // substitua pela sua chave de API do ClickUp
+      const url = `https://api.clickup.com/api/v2/list/${list}/task`;
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: apiKey,
+        },
+        body: JSON.stringify(taskData),
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+
+        const makeData = {
+          taskName: responseData.name,
+          taskId: responseData.id,
+          space: space,
+          folder: folder,
+          list: list,
+          assignee: answers[1],
+          dueDate: answers[3],
+        };
+
+        const makeUrl = 'https://make.com/webhook'; // substitua pela URL do seu webhook no Make
+
+        await fetch(makeUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(makeData),
+        });
+
+        await message.author.send(
+          `A tarefa "${responseData.name}" foi criada com sucesso e enviada para o espaço ${space}, pasta ${folder} e lista ${list} no ClickUp.`
+        );
+      } else {
+        await message.author.send(
+          'Ocorreu um erro ao tentar criar a tarefa no ClickUp.'
+        );
+      }
+    });
+  }
+});
+
+client.login('DISCORD_BOT_TOKEN'); // substitua pelo token do seu bot no Discord
