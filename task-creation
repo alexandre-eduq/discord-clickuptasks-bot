@@ -51,7 +51,7 @@ client.on('message', async (message) => {
       const folder = answers[5];
       const list = answers[6];
 
-      const apiKey = 'API_KEY'; // substitua pela sua chave de API do ClickUp
+      const apiKey = 'pk_49036711_MIIAMCSFQ4SVURO51PKH7XIE2WKKLXO1'; // substitua pela sua chave de API do ClickUp
       const url = `https://api.clickup.com/api/v2/list/${list}/task`;
 
       const response = await fetch(url, {
@@ -76,7 +76,7 @@ client.on('message', async (message) => {
           dueDate: answers[3],
         };
 
-        const makeUrl = 'https://make.com/webhook'; // substitua pela URL do seu webhook no Make
+        const makeUrl = 'https://hook.us1.make.com/o2hf9e63snqwta68qx2phhwsq7e8g5zy'; // substitua pela URL do seu webhook no Make
 
         await fetch(makeUrl, {
           method: 'POST',
@@ -98,4 +98,4 @@ client.on('message', async (message) => {
   }
 });
 
-client.login('DISCORD_BOT_TOKEN'); // substitua pelo token do seu bot no Discord
+client.login('MTA3Nzk4MzQ3OTY3NDk2NjE0Ng.G9NIt7.gqEc3mev_Ias0AQCCcJ53PJ86VOyoLUl3EVo2U'); // substitua pelo token do seu bot no Discord
